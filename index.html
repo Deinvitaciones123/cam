@@ -1,159 +1,292 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Invitación</title>
+
+<!-- TIP: sustituye la fuente por una que sí exista en Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Hugs+and+Kisses&display=swap');
+  :root{
+    --pink:#ff6ec7; --peach:#ff8c42; --white:#fff;
+  }
 
   body {
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif;
     text-align: center;
     margin: 0;
-    height: 100vh;
+    min-height: 100vh;
     overflow: hidden;
-    background: url('https://i0.wp.com/i.pinimg.com/originals/12/d6/8a/12d68aeeabea27504d88c415044248af.gif') no-repeat center center fixed;
+    background: url('/assets/fondo.gif') no-repeat center center fixed; /* hospeda el gif tú */
     background-size: cover;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 30px;
-    padding: 50px 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    gap: 20px;
   }
+
+  .wrap { display:flex; flex-direction:column; align-items:center; gap:18px; z-index:1; }
 
   h2 {
-    font-family: 'Hugs and Kisses', cursive;
-    color: #fff;
-    font-size: 60px;
-    text-shadow: 0 0 5px #ffb3c1, 0 0 10px #ff6ec7, 0 0 20px #ff6ec7;
-    z-index: 2;
-    position: relative;
+    font-family: "Great Vibes", cursive;
+    color: var(--white);
+    font-size: clamp(36px, 6vw, 64px);
+    text-shadow: 0 0 5px #ffb3c1, 0 0 10px var(--pink), 0 0 20px var(--pink);
+    margin: 0 0 6px;
   }
 
-  #fotoBtn, #retakeBtn, #uploadBtn {
-    background: linear-gradient(45deg, #ff6ec7, #ff8c42, #ff6ec7);
+  .btn {
+    background: linear-gradient(45deg, var(--pink), var(--peach), var(--pink));
     background-size: 400% 400%;
-    border: none;
-    color: white;
-    padding: 18px 40px;
-    font-size: 20px;
-    font-weight: bold;
-    border-radius: 15px;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    border: none; color:#fff;
+    padding: 14px 28px; font-size: 18px; font-weight: 700;
+    border-radius: 14px; cursor: pointer;
+    transition: transform .25s ease, box-shadow .25s ease;
+    box-shadow: 0 6px 20px rgba(0,0,0,.25);
     animation: gradientBG 5s ease infinite;
-    z-index: 2;
-    position: relative;
-    overflow: hidden;
-    margin: 5px;
   }
-
-  #fotoBtn:hover, #retakeBtn:hover, #uploadBtn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.35);
-  }
-
-  #video, #preview {
-    border-radius: 25px;
-    border: 5px solid #ff8c42;
-    width: 500px;
-    height: 375px;
-    object-fit: cover;
-    z-index: 2;
-    position: relative;
-    box-shadow: 0 0 20px #ff6ec7, 0 0 40px #ffb3c1, 0 0 60px #ff6ec7;
-    animation: glow 2s ease-in-out infinite alternate;
-  }
-
-  #preview { display: none; }
-
-  @keyframes glow {
-    0% { box-shadow: 0 0 20px #ff6ec7, 0 0 40px #ffb3c1, 0 0 60px #ff6ec7; }
-    100% { box-shadow: 0 0 40px #ff6ec7, 0 0 60px #ffb3c1, 0 0 80px #ff6ec7; }
-  }
+  .btn:hover { transform: scale(1.06); box-shadow: 0 10px 25px rgba(0,0,0,.35); }
 
   @keyframes gradientBG {
     0% {background-position: 0% 50%;}
     50% {background-position: 100% 50%;}
     100% {background-position: 0% 50%;}
   }
+
+  #video, #preview {
+    border-radius: 22px;
+    border: 4px solid var(--peach);
+    width: min(92vw, 520px);
+    height: min(69vw, 390px);
+    object-fit: cover;
+    box-shadow: 0 0 20px var(--pink), 0 0 40px #ffb3c1, 0 0 60px var(--pink);
+    background: rgba(0,0,0,.2);
+  }
+
+  /* espejo para selfie */
+  #video { transform: scaleX(-1); animation: glow 2s ease-in-out infinite alternate; }
+  @keyframes glow {
+    0% { box-shadow: 0 0 20px var(--pink), 0 0 40px #ffb3c1, 0 0 60px var(--pink); }
+    100%{ box-shadow: 0 0 40px var(--pink), 0 0 60px #ffb3c1, 0 0 80px var(--pink); }
+  }
+
+  .float { position: fixed; inset: 0; pointer-events:none; }
+  .heart, .star {
+    position: absolute; width: 18px; height: 18px;
+    animation: floatUp linear infinite;
+    will-change: transform, opacity;
+  }
+  .heart { background-color: rgba(255,108,199,.8);
+    clip-path: polygon(50% 0%,61% 12%,75% 12%,87% 25%,87% 38%,75% 50%,50% 75%,25% 50%,13% 38%,13% 25%,25% 12%,39% 12%); }
+  .star { background-color: rgba(255,255,255,.7);
+    clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) scale(1); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translateY(-100px) scale(.5); opacity: 0; }
+  }
+
+  .hidden { display:none !important; }
+
+  /* estado final */
+  body.done { display:grid; place-items:center; }
+  body.done .wrap, body.done .float { display:none; }
+  .thanks {
+    font-family: "Great Vibes", cursive; color: #fff;
+    font-size: clamp(32px, 5vw, 56px);
+    text-align:center; padding: 16px;
+    text-shadow: 0 0 5px #ffb3c1, 0 0 10px var(--pink), 0 0 20px var(--pink);
+  }
 </style>
 </head>
 <body>
-  <h2>¡Gracias por acompañarnos!</h2>
-  <video id="video" autoplay></video>
-  <img id="preview" />
-  <div id="btnsContainer">
-    <button id="fotoBtn">Tomar Foto</button>
+  <div class="float" aria-hidden="true" id="floatLayer"></div>
+
+  <div class="wrap" id="ui">
+    <h2>¡Gracias por acompañarnos!</h2>
+
+    <video id="video" playsinline autoplay muted class="hidden" aria-label="Vista previa de la cámara"></video>
+    <img id="preview" alt="Foto tomada" class="hidden"/>
+
+    <div id="btns">
+      <button class="btn" id="startBtn" aria-label="Activar cámara">Activar cámara</button>
+      <button class="btn hidden" id="shotBtn" aria-label="Tomar foto">Tomar foto</button>
+      <button class="btn hidden" id="retakeBtn" aria-label="Tomar otra foto">Tomar otra</button>
+      <button class="btn hidden" id="uploadBtn" aria-label="Subir foto">Subir</button>
+    </div>
+
+    <canvas id="canvas" class="hidden"></canvas>
   </div>
-  <canvas id="canvas" style="display:none;"></canvas>
 
-  <script>
-    const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const context = canvas.getContext("2d");
-    const preview = document.getElementById("preview");
-    const btnsContainer = document.getElementById("btnsContainer");
+  <!-- Botones extra para cámara -->
+<div id="camControls" style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+  <button class="btn" id="startBtn" aria-label="Activar cámara">Activar cámara</button>
+  <button class="btn" id="toggleFacingBtn" aria-label="Cambiar cámara" style="display:none;">Cambiar a trasera</button>
+  <select id="cameraSelector" class="btn" style="display:none; padding:10px;"></select>
+</div>
 
-    let stream;
+<script>
+(() => {
+  const video = document.getElementById('video');           // ya lo tienes en tu HTML
+  const preview = document.getElementById('preview');       // idem
+  const canvas = document.getElementById('canvas');         // idem
+  const shotBtn = document.getElementById('fotoBtn') || document.getElementById('shotBtn'); // compat
+  const btnsContainer = document.getElementById('btnsContainer') || document.getElementById('btns');
+  const startBtn = document.getElementById('startBtn');
+  const toggleFacingBtn = document.getElementById('toggleFacingBtn');
+  const cameraSelector = document.getElementById('cameraSelector');
 
-    async function startCamera() {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
-        video.style.display = "block";
-        preview.style.display = "none";
-        btnsContainer.innerHTML = '<button id="fotoBtn">Tomar Foto</button>';
-        document.getElementById("fotoBtn").onclick = takePhoto;
-      } catch (err) {
-        alert("Error al acceder a la cámara: " + err);
+  let stream = null;
+  let currentFacing = 'user';      // 'user' = frontal (selfie), 'environment' = trasera
+  let currentDeviceId = null;      // cuando elijas explícitamente una cámara
+
+  // util
+  const show = el => el && (el.style.display = '');
+  const hide = el => el && (el.style.display = 'none');
+
+  // Lista cámaras tras tener permiso
+  async function listCameras() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videos = devices.filter(d => d.kind === 'videoinput');
+      cameraSelector.innerHTML = '';
+      videos.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.deviceId;
+        opt.textContent = d.label || `Cámara ${cameraSelector.length + 1}`;
+        cameraSelector.appendChild(opt);
+      });
+      if (videos.length > 1) {
+        show(cameraSelector);
+      } else {
+        hide(cameraSelector);
       }
+    } catch (e) {
+      // algunos navegadores no dan labels hasta que hay permiso
+      hide(cameraSelector);
     }
+  }
 
-    function takePhoto() {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0);
-      const imgData = canvas.toDataURL("image/png");
+  // Inicia cámara con constraints (por facingMode o deviceId)
+  async function startCamera({ facingMode = currentFacing, deviceId = currentDeviceId } = {}) {
+    try {
+      // detener stream previo
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
 
-      preview.src = imgData;
-      preview.style.display = "block";
-      video.style.display = "none";
+      const constraints = { audio: false, video: {} };
+      if (deviceId) {
+        constraints.video.deviceId = { exact: deviceId };
+      } else {
+        constraints.video.facingMode = { ideal: facingMode }; // frontal o trasera
+      }
 
+      stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      video.srcObject = stream;
+      // iOS necesita playsinline para no full-screen
+      video.setAttribute('playsinline', 'true');
+      video.muted = true; // ayuda en iOS para autoplay
+      await new Promise(res => (video.onloadedmetadata = res));
+      await video.play();
+
+      // UI
+      show(video);
+      hide(preview);
+      show(toggleFacingBtn);
+      toggleFacingBtn.textContent = (facingMode === 'user') ? 'Cambiar a trasera' : 'Cambiar a frontal';
+
+      // ya tenemos permiso → podemos listar cámaras con nombres
+      await listCameras();
+
+      // si hay deviceId activo, selecciónalo en el selector
+      if (deviceId) {
+        [...cameraSelector.options].forEach(o => (o.selected = (o.value === deviceId)));
+      }
+    } catch (err) {
+      // Errores comunes y mensaje claro
+      let msg = 'No se pudo abrir la cámara.';
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        msg += '\n• Necesitas abrir la página con HTTPS (requisito del navegador).';
+      }
+      if (err && err.name === 'NotAllowedError') {
+        msg += '\n• Permiso denegado: revisa los permisos del navegador.';
+      } else if (err && err.name === 'NotFoundError') {
+        msg += '\n• No se encontró cámara disponible.';
+      } else if (err && err.name === 'OverconstrainedError') {
+        msg += '\n• La cámara solicitada no cumple los constraints (intenta la otra).';
+      }
+      alert(msg + (err?.message ? '\n\nDetalle: ' + err.message : ''));
+      hide(toggleFacingBtn);
+      hide(cameraSelector);
+    }
+  }
+
+  // Tomar foto (respeta tu flujo existente)
+  async function takePhoto() {
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if (!vw || !vh) { alert('La cámara aún no está lista. Intenta de nuevo.'); return; }
+    canvas.width = vw; canvas.height = vh;
+    const ctx = canvas.getContext('2d');
+
+    // Si el video está espejeado (selfie), deshaz el espejo al dibujar al canvas
+    const mirrored = (currentDeviceId === null && currentFacing === 'user');
+    if (mirrored) {
+      ctx.translate(vw, 0); ctx.scale(-1, 1);
+    }
+    ctx.drawImage(video, 0, 0, vw, vh);
+    if (mirrored) { ctx.setTransform(1,0,0,1,0,0); }
+
+    const imgURL = canvas.toDataURL('image/jpeg', 0.9);
+    preview.src = imgURL;
+    preview.style.display = 'block';
+    video.style.display = 'none';
+
+    // tus botones de retomar/subir (si los generas con innerHTML, vuelve a asignar listeners)
+    if (btnsContainer) {
       btnsContainer.innerHTML = `
-        <button id="retakeBtn">Tomar Otra</button>
-        <button id="uploadBtn">Subir</button>
+        <button id="retakeBtn" class="btn">Tomar otra</button>
+        <button id="uploadBtn" class="btn">Subir</button>
       `;
-
-      document.getElementById("retakeBtn").onclick = () => startCamera();
-
-      document.getElementById("uploadBtn").onclick = () => {
-        fetch("https://script.google.com/macros/s/AKfycbyWA_xF9xG18fwljCZsJH2ygxYAOmHQ8VyCxMHvg0_fegnj46fv_jUXWQFyurxyjOMBVQ/exec", {
-          method: "POST",
-          body: JSON.stringify({ image: imgData })
-        })
-        .then(res => res.text())
-        .then(msg => alert("Servidor dice: " + msg))
-        .catch(err => alert("Error: " + err))
-        .finally(() => {
-          if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-          }
-          document.body.innerHTML = `
-            <h1 style="font-family: 'Hugs and Kisses', cursive; color: #fff; font-size: 50px; text-align: center; margin-top: 20%;
-            text-shadow: 0 0 5px #ffb3c1, 0 0 10px #ff6ec7, 0 0 20px #ff6ec7;">
-              Gracias por tu presencia, es muy importante para nosotros en este día tan especial
-            </h1>
-          `;
-          document.body.style.background = "url('https://i0.wp.com/i.pinimg.com/originals/12/d6/8a/12d68aeeabea27504d88c415044248af.gif') no-repeat center center fixed";
-          document.body.style.backgroundSize = "cover";
-        });
+      document.getElementById('retakeBtn').onclick = () => {
+        preview.style.display = 'none';
+        video.style.display = '';
+      };
+      document.getElementById('uploadBtn').onclick = () => {
+        // aquí reusa tu lógica de subida (FormData/endpoint)
+        alert('Subiría la foto aquí 🚀 (implementa tu fetch al servidor)');
       };
     }
+  }
 
-    startCamera();
-  </script>
+  // Eventos
+  startBtn?.addEventListener('click', () => startCamera({ facingMode: 'user' }));
+  toggleFacingBtn?.addEventListener('click', async () => {
+    // Si usaste deviceId del selector, borra deviceId y alterna facing
+    currentDeviceId = null;
+    currentFacing = (currentFacing === 'user') ? 'environment' : 'user';
+    await startCamera({ facingMode: currentFacing });
+  });
+  cameraSelector?.addEventListener('change', async (e) => {
+    currentDeviceId = e.target.value;
+    await startCamera({ deviceId: currentDeviceId });
+  });
+
+  // Reasigna el botón de “Tomar Foto” existente a esta función robusta
+  if (shotBtn) {
+    shotBtn.addEventListener('click', takePhoto);
+  }
+
+  // Limpieza al salir
+  window.addEventListener('beforeunload', () => {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+  });
+})();
+</script>
+
 </body>
 </html>
