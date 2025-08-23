@@ -110,15 +110,17 @@
     <video id="video" playsinline autoplay muted class="hidden" aria-label="Vista previa de la cámara"></video>
     <img id="preview" alt="Foto tomada" class="hidden"/>
 
+    <div id="btns">
+      <button class="btn" id="startBtn" aria-label="Activar cámara">Activar cámara</button>
+      <button class="btn hidden" id="shotBtn" aria-label="Tomar foto">Tomar foto</button>
+      <button class="btn hidden" id="retakeBtn" aria-label="Tomar otra foto">Tomar otra</button>
+      <button class="btn hidden" id="uploadBtn" aria-label="Subir foto">Subir</button>
+      <button class="btn" id="toggleFacingBtn" aria-label="Cambiar cámara" style="display:none;">Cambiar a trasera</button>
+      <select id="cameraSelector" class="btn" style="display:none; padding:10px;"></select>
+    </div>
+
     <canvas id="canvas" class="hidden"></canvas>
   </div>
-
-  <!-- Botones extra para cámara -->
-<div id="camControls" style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
-  <button class="btn" id="startBtn" aria-label="Activar cámara">Activar cámara</button>
-  <button class="btn" id="toggleFacingBtn" aria-label="Cambiar cámara" style="display:none;">Cambiar a trasera</button>
-  <select id="cameraSelector" class="btn" style="display:none; padding:10px;"></select>
-</div>
 
 <script>
   (() => {
