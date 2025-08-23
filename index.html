@@ -110,13 +110,6 @@
     <video id="video" playsinline autoplay muted class="hidden" aria-label="Vista previa de la cámara"></video>
     <img id="preview" alt="Foto tomada" class="hidden"/>
 
-    <div id="btns">
-      <button class="btn" id="startBtn" aria-label="Activar cámara">Activar cámara</button>
-      <button class="btn hidden" id="shotBtn" aria-label="Tomar foto">Tomar foto</button>
-      <button class="btn hidden" id="retakeBtn" aria-label="Tomar otra foto">Tomar otra</button>
-      <button class="btn hidden" id="uploadBtn" aria-label="Subir foto">Subir</button>
-    </div>
-
     <canvas id="canvas" class="hidden"></canvas>
   </div>
 
@@ -128,165 +121,135 @@
 </div>
 
 <script>
-(() => {
-  const video = document.getElementById('video');           // ya lo tienes en tu HTML
-  const preview = document.getElementById('preview');       // idem
-  const canvas = document.getElementById('canvas');         // idem
-  const shotBtn = document.getElementById('fotoBtn') || document.getElementById('shotBtn'); // compat
-  const btnsContainer = document.getElementById('btnsContainer') || document.getElementById('btns');
-  const startBtn = document.getElementById('startBtn');
-  const toggleFacingBtn = document.getElementById('toggleFacingBtn');
-  const cameraSelector = document.getElementById('cameraSelector');
-
-  let stream = null;
-  let currentFacing = 'user';      // 'user' = frontal (selfie), 'environment' = trasera
-  let currentDeviceId = null;      // cuando elijas explícitamente una cámara
-
-  // util
-  const show = el => el && (el.style.display = '');
-  const hide = el => el && (el.style.display = 'none');
-
-  // Lista cámaras tras tener permiso
-  async function listCameras() {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videos = devices.filter(d => d.kind === 'videoinput');
-      cameraSelector.innerHTML = '';
-      videos.forEach(d => {
-        const opt = document.createElement('option');
-        opt.value = d.deviceId;
-        opt.textContent = d.label || `Cámara ${cameraSelector.length + 1}`;
-        cameraSelector.appendChild(opt);
-      });
-      if (videos.length > 1) {
-        show(cameraSelector);
-      } else {
-        hide(cameraSelector);
+  (() => {
+    const $ = sel => document.querySelector(sel);
+    const video = $('#video');
+    const preview = $('#preview');
+    const canvas = $('#canvas');
+    const startBtn = $('#startBtn');
+    const toggleBtn = $('#toggleBtn');
+    const shotBtn = $('#shotBtn');
+    const retakeBtn = $('#retakeBtn');
+    const uploadBtn = $('#uploadBtn');
+    const diag = $('#diag');
+  
+    let stream = null;
+    let facing = 'user';      // 'user' (selfie) | 'environment' (trasera)
+  
+    function show(el){ el.classList.remove('hidden'); }
+    function hide(el){ el.classList.add('hidden'); }
+    function log(msg){ diag.textContent = msg; }
+  
+    // Chequeo de soporte y contexto
+    function supportCheck(){
+      if (!window.isSecureContext) {
+        log('Aviso: abre en HTTPS o localhost. (En Safari dentro de WhatsApp puede fallar)');
       }
-    } catch (e) {
-      // algunos navegadores no dan labels hasta que hay permiso
-      hide(cameraSelector);
+      if (!('mediaDevices' in navigator)) navigator.mediaDevices = {};
+      if (!navigator.mediaDevices.getUserMedia) {
+        const gum = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+        if (gum) {
+          navigator.mediaDevices.getUserMedia = (c)=>new Promise((res,rej)=>gum.call(navigator,c,res,rej));
+        }
+      }
+      return !!navigator.mediaDevices.getUserMedia;
     }
-  }
-
-  // Inicia cámara con constraints (por facingMode o deviceId)
-  async function startCamera({ facingMode = currentFacing, deviceId = currentDeviceId } = {}) {
-    try {
-      // detener stream previo
-      if (stream) {
-        stream.getTracks().forEach(t => t.stop());
-        stream = null;
+  
+    async function startCamera() {
+      try {
+        if (!supportCheck()) throw new Error('getUserMedia no disponible en este navegador');
+        if (stream) { stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  
+        const constraints = { audio:false, video:{ facingMode:{ ideal: facing } } };
+        log('Solicitando permisos…');
+  
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+  
+        video.srcObject = stream;
+        video.setAttribute('playsinline','true'); // iOS
+        await new Promise(r => (video.onloadedmetadata = r));
+        await video.play();
+  
+        // UI
+        video.style.transform = (facing === 'user') ? 'scaleX(-1)' : 'none';
+        show(video); hide(preview);
+        hide(startBtn);
+        show(shotBtn); show(toggleBtn);
+        hide(retakeBtn); hide(uploadBtn);
+        toggleBtn.textContent = (facing === 'user') ? 'Cambiar a trasera' : 'Cambiar a frontal';
+        log('Cámara lista ✅');
+      } catch (err) {
+        alert("No se pudo acceder a la cámara.\n" +
+              "• Si abriste desde WhatsApp, toca 'Abrir en Safari'.\n" +
+              "• Revisa permisos en Ajustes > Safari > Cámara (Permitir).\n\n" +
+              (err && err.message ? "Detalle: " + err.message : ""));
+        log('Error: ' + (err?.message || err));
       }
-
-      const constraints = { audio: false, video: {} };
-      if (deviceId) {
-        constraints.video.deviceId = { exact: deviceId };
-      } else {
-        constraints.video.facingMode = { ideal: facingMode }; // frontal o trasera
-      }
-
-      stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-      video.srcObject = stream;
-      // iOS necesita playsinline para no full-screen
-      video.setAttribute('playsinline', 'true');
-      video.muted = true; // ayuda en iOS para autoplay
-      await new Promise(res => (video.onloadedmetadata = res));
-      await video.play();
-
-      // UI
-      show(video);
-      hide(preview);
-      show(toggleFacingBtn);
-      toggleFacingBtn.textContent = (facingMode === 'user') ? 'Cambiar a trasera' : 'Cambiar a frontal';
-
-      // ya tenemos permiso → podemos listar cámaras con nombres
-      await listCameras();
-
-      // si hay deviceId activo, selecciónalo en el selector
-      if (deviceId) {
-        [...cameraSelector.options].forEach(o => (o.selected = (o.value === deviceId)));
-      }
-    } catch (err) {
-      // Errores comunes y mensaje claro
-      let msg = 'No se pudo abrir la cámara.';
-      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-        msg += '\n• Necesitas abrir la página con HTTPS (requisito del navegador).';
-      }
-      if (err && err.name === 'NotAllowedError') {
-        msg += '\n• Permiso denegado: revisa los permisos del navegador.';
-      } else if (err && err.name === 'NotFoundError') {
-        msg += '\n• No se encontró cámara disponible.';
-      } else if (err && err.name === 'OverconstrainedError') {
-        msg += '\n• La cámara solicitada no cumple los constraints (intenta la otra).';
-      }
-      alert(msg + (err?.message ? '\n\nDetalle: ' + err.message : ''));
-      hide(toggleFacingBtn);
-      hide(cameraSelector);
     }
-  }
-
-  // Tomar foto (respeta tu flujo existente)
-  async function takePhoto() {
-    const vw = video.videoWidth, vh = video.videoHeight;
-    if (!vw || !vh) { alert('La cámara aún no está lista. Intenta de nuevo.'); return; }
-    canvas.width = vw; canvas.height = vh;
-    const ctx = canvas.getContext('2d');
-
-    // Si el video está espejeado (selfie), deshaz el espejo al dibujar al canvas
-    const mirrored = (currentDeviceId === null && currentFacing === 'user');
-    if (mirrored) {
-      ctx.translate(vw, 0); ctx.scale(-1, 1);
+  
+    function takePhoto(){
+      const vw = video.videoWidth, vh = video.videoHeight;
+      if (!vw || !vh) { alert('La cámara aún no está lista, intenta de nuevo.'); return; }
+  
+      canvas.width = vw; canvas.height = vh;
+      const ctx = canvas.getContext('2d');
+  
+      // Si está en selfie, “desespeja” al dibujar
+      if (facing === 'user') { ctx.translate(vw,0); ctx.scale(-1,1); }
+      ctx.drawImage(video, 0, 0, vw, vh);
+      if (facing === 'user') { ctx.setTransform(1,0,0,1,0,0); }
+  
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        preview.src = url;
+        show(preview); hide(video);
+        hide(shotBtn); show(retakeBtn); show(uploadBtn);
+      }, 'image/jpeg', 0.9);
     }
-    ctx.drawImage(video, 0, 0, vw, vh);
-    if (mirrored) { ctx.setTransform(1,0,0,1,0,0); }
-
-    const imgURL = canvas.toDataURL('image/jpeg', 0.9);
-    preview.src = imgURL;
-    preview.style.display = 'block';
-    video.style.display = 'none';
-
-    // tus botones de retomar/subir (si los generas con innerHTML, vuelve a asignar listeners)
-    if (btnsContainer) {
-      btnsContainer.innerHTML = `
-        <button id="retakeBtn" class="btn">Tomar otra</button>
-        <button id="uploadBtn" class="btn">Subir</button>
-      `;
-      document.getElementById('retakeBtn').onclick = () => {
-        preview.style.display = 'none';
-        video.style.display = '';
-      };
-      document.getElementById('uploadBtn').onclick = () => {
-        // aquí reusa tu lógica de subida (FormData/endpoint)
-        alert('Subiría la foto aquí 🚀 (implementa tu fetch al servidor)');
-      };
+  
+    function retake(){
+      show(video); hide(preview);
+      show(shotBtn); hide(retakeBtn); hide(uploadBtn);
     }
-  }
-
-  // Eventos
-  startBtn?.addEventListener('click', () => startCamera({ facingMode: 'user' }));
-  toggleFacingBtn?.addEventListener('click', async () => {
-    // Si usaste deviceId del selector, borra deviceId y alterna facing
-    currentDeviceId = null;
-    currentFacing = (currentFacing === 'user') ? 'environment' : 'user';
-    await startCamera({ facingMode: currentFacing });
-  });
-  cameraSelector?.addEventListener('change', async (e) => {
-    currentDeviceId = e.target.value;
-    await startCamera({ deviceId: currentDeviceId });
-  });
-
-  // Reasigna el botón de “Tomar Foto” existente a esta función robusta
-  if (shotBtn) {
+  
+    async function upload(){
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      const body = new URLSearchParams({ image: dataUrl });
+  
+      try{
+        const resp = await fetch("https://script.google.com/macros/s/AKfycbyWA_xF9xG18fwljCZsJH2ygxYAOmHQ8VyCxMHvg0_fegnj46fv_jUXWQFyurxyjOMBVQ/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+          body
+        });
+        await resp.text();
+        if (stream) { stream.getTracks().forEach(t => t.stop()); stream=null; }
+        document.body.classList.add('done');
+        document.body.innerHTML = `<h1 class="thanks">Gracias por tu presencia, es muy importante para nosotros en este día tan especial</h1>`;
+      } catch(err){
+        alert('Error al subir: ' + err);
+      }
+    }
+  
+    // Eventos
+    startBtn.addEventListener('click', startCamera);
+    toggleBtn.addEventListener('click', async () => {
+      facing = (facing === 'user') ? 'environment' : 'user';
+      await startCamera();
+    });
     shotBtn.addEventListener('click', takePhoto);
-  }
-
-  // Limpieza al salir
-  window.addEventListener('beforeunload', () => {
-    if (stream) stream.getTracks().forEach(t => t.stop());
-  });
-})();
-</script>
+    retakeBtn.addEventListener('click', retake);
+    uploadBtn.addEventListener('click', upload);
+  
+    // Diagnóstico visible
+    log([
+      `Seguro: ${window.isSecureContext ? 'sí' : 'no'}`,
+      `getUserMedia: ${supportCheck() ? 'sí' : 'no'}`,
+      `iOS: ${/iPad|iPhone|iPod/.test(navigator.userAgent) ? 'sí' : 'no'}`
+    ].join(' | '));
+  })();
+  </script>
+  
 
 </body>
 </html>
