@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invitación</title>
+
+<!-- TIP: sustituye la fuente por una que sí exista en Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --pink:#ff6ec7; --peach:#ff8c42; --white:#fff;
+  }
+
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    min-height: 100vh;
+    overflow: hidden;
+    background: url('/assets/fondo.gif') no-repeat center center fixed; /* hospeda el gif tú */
+    background-size: cover;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    gap: 20px;
+  }
+
+  .wrap { display:flex; flex-direction:column; align-items:center; gap:18px; z-index:1; }
+
+  h2 {
+    font-family: "Great Vibes", cursive;
+    color: var(--white);
+    font-size: clamp(36px, 6vw, 64px);
+    text-shadow: 0 0 5px #ffb3c1, 0 0 10px var(--pink), 0 0 20px var(--pink);
+    margin: 0 0 6px;
+  }
+
+  .btn {
+    background: linear-gradient(45deg, var(--pink), var(--peach), var(--pink));
+    background-size: 400% 400%;
+    border: none; color:#fff;
+    padding: 14px 28px; font-size: 18px; font-weight: 700;
+    border-radius: 14px; cursor: pointer;
+    transition: transform .25s ease, box-shadow .25s ease;
+    box-shadow: 0 6px 20px rgba(0,0,0,.25);
+    animation: gradientBG 5s ease infinite;
+  }
+  .btn:hover { transform: scale(1.06); box-shadow: 0 10px 25px rgba(0,0,0,.35); }
+
+  @keyframes gradientBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+  }
+
+  #video, #preview {
+    border-radius: 22px;
+    border: 4px solid var(--peach);
+    width: min(92vw, 520px);
+    height: min(69vw, 390px);
+    object-fit: cover;
+    box-shadow: 0 0 20px var(--pink), 0 0 40px #ffb3c1, 0 0 60px var(--pink);
+    background: rgba(0,0,0,.2);
+  }
+
+  /* espejo para selfie */
+  #video { transform: scaleX(-1); animation: glow 2s ease-in-out infinite alternate; }
+  @keyframes glow {
+    0% { box-shadow: 0 0 20px var(--pink), 0 0 40px #ffb3c1, 0 0 60px var(--pink); }
+    100%{ box-shadow: 0 0 40px var(--pink), 0 0 60px #ffb3c1, 0 0 80px var(--pink); }
+  }
+
+  .float { position: fixed; inset: 0; pointer-events:none; }
+  .heart, .star {
+    position: absolute; width: 18px; height: 18px;
+    animation: floatUp linear infinite;
+    will-change: transform, opacity;
+  }
+  .heart { background-color: rgba(255,108,199,.8);
+    clip-path: polygon(50% 0%,61% 12%,75% 12%,87% 25%,87% 38%,75% 50%,50% 75%,25% 50%,13% 38%,13% 25%,25% 12%,39% 12%); }
+  .star { background-color: rgba(255,255,255,.7);
+    clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) scale(1); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translateY(-100px) scale(.5); opacity: 0; }
+  }
+
+  .hidden { display:none !important; }
+
+  /* estado final */
+  body.done { display:grid; place-items:center; }
+  body.done .wrap, body.done .float { display:none; }
+  .thanks {
+    font-family: "Great Vibes", cursive; color: #fff;
+    font-size: clamp(32px, 5vw, 56px);
+    text-align:center; padding: 16px;
+    text-shadow: 0 0 5px #ffb3c1, 0 0 10px var(--pink), 0 0 20px var(--pink);
+  }
+</style>
+</head>
+<body>
+  <div class="float" aria-hidden="true" id="floatLayer"></div>
+
+  <div class="wrap" id="ui">
+    <h2>¡Gracias por acompañarnos!</h2>
+
+    <video id="video" playsinline autoplay muted class="hidden" aria-label="Vista previa de la cámara"></video>
+    <img id="preview" alt="Foto tomada" class="hidden"/>
+
+    <div id="btns">
+      <button class="btn" id="startBtn" aria-label="Activar cámara">Activar cámara</button>
+      <button class="btn hidden" id="shotBtn" aria-label="Tomar foto">Tomar foto</button>
+      <button class="btn hidden" id="retakeBtn" aria-label="Tomar otra foto">Tomar otra</button>
+      <button class="btn hidden" id="uploadBtn" aria-label="Subir foto">Subir</button>
+    </div>
+
+    <canvas id="canvas" class="hidden"></canvas>
+  </div>
+
+  <script>
+    (function(){
+      const video = document.getElementById('video');
+      const preview = document.getElementById('preview');
+      const canvas = document.getElementById('canvas');
+      const startBtn = document.getElementById('startBtn');
+      const shotBtn = document.getElementById('shotBtn');
+      const retakeBtn = document.getElementById('retakeBtn');
+      const uploadBtn = document.getElementById('uploadBtn');
+      const floatLayer = document.getElementById('floatLayer');
+    
+      let stream = null;
+      let floatTimer = null;
+    
+      // ==== Utilidades UI ====
+      const show = el => el.classList.remove('hidden');
+      const hide = el => el.classList.add('hidden');
+    
+      // ==== Diagnóstico rápido ====
+      function assertCameraSupport() {
+        // 1) HTTPS real y certificado válido
+        if (!window.isSecureContext) {
+          throw new Error(
+            "Contexto no seguro.\n" +
+            "• Abre el sitio con HTTPS y certificado válido.\n" +
+            "• Si usas un puerto (ej. :2020), el certificado debe cubrir ese host.\n" +
+            "• http:// o certificado inválido → la cámara se bloquea."
+          );
+        }
+    
+        // 2) mediaDevices / getUserMedia
+        if (!('mediaDevices' in navigator)) {
+          navigator.mediaDevices = {};
+        }
+        if (!navigator.mediaDevices.getUserMedia) {
+          // Polyfill sencillo con prefijos antiguos
+          const getUserMedia = navigator.getUserMedia ||
+                               navigator.webkitGetUserMedia ||
+                               navigator.mozGetUserMedia ||
+                               navigator.msGetUserMedia;
+          if (getUserMedia) {
+            navigator.mediaDevices.getUserMedia = (constraints) =>
+              new Promise((resolve, reject) => getUserMedia.call(navigator, constraints, resolve, reject));
+          }
+        }
+        if (!navigator.mediaDevices.getUserMedia) {
+          throw new Error(
+            "Este navegador/WebView no expone mediaDevices.getUserMedia.\n" +
+            "• Actualiza el navegador o abre en Chrome/Safari/Firefox recientes.\n" +
+            "• Evita WebView incrustados sin permisos."
+          );
+        }
+    
+        // 3) Si está embebido en iframe, requiere allow
+        if (window.top !== window.self) {
+          // No puedo comprobar el atributo desde aquí, pero te avisamos:
+          console.warn('Página dentro de iframe: asegúrate que el iframe tenga allow="camera; microphone".');
+        }
+      }
+    
+      // ==== Partículas (tu animación) ====
+      function createFloating(){
+        const isHeart = Math.random() > 0.3;
+        const el = document.createElement('div');
+        el.className = isHeart ? 'heart' : 'star';
+        el.style.left = Math.random()*100 + 'vw';
+        const size = 10 + Math.random()*22;
+        el.style.width = el.style.height = size + 'px';
+        el.style.animationDuration = (5 + Math.random()*5) + 's';
+        floatLayer.appendChild(el);
+        setTimeout(()=> el.remove(), 10000);
+      }
+      function startFloating(){
+        if(!floatTimer) floatTimer = setInterval(createFloating, 350);
+      }
+      function stopFloating(){
+        if(floatTimer){ clearInterval(floatTimer); floatTimer = null; }
+      }
+    
+      // ==== Cámara ====
+      async function startCamera(){
+        try{
+          assertCameraSupport();
+    
+          // Detén un stream previo si lo hay
+          if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    
+          // Nota: facingMode 'user' (selfie). Si quieres trasera: 'environment'
+          const constraints = { audio:false, video:{ facingMode: { ideal: 'user' } } };
+    
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+    
+          // iOS: playsinline + muted ayudan a evitar fullscreen
+          video.srcObject = stream;
+          video.setAttribute('playsinline','true');
+          video.muted = true;
+    
+          await new Promise(res => (video.onloadedmetadata = res));
+          await video.play();
+    
+          show(video);
+          hide(preview);
+          hide(startBtn);
+          show(shotBtn);
+          hide(retakeBtn);
+          hide(uploadBtn);
+    
+        } catch(err){
+          alert(
+            "No se pudo acceder a la cámara. Verifica permisos/HTTPS.\n" +
+            (err && err.message ? "TypeError: " + err.message : "")
+          );
+        }
+      }
+    
+      function takePhoto(){
+        const vw = video.videoWidth, vh = video.videoHeight;
+        if(!vw || !vh){ alert("La cámara aún no está lista, intenta de nuevo."); return; }
+    
+        canvas.width = vw; canvas.height = vh;
+        const ctx = canvas.getContext('2d');
+    
+        // “Desespeja” la selfie (el <video> está espejeado con CSS)
+        ctx.save();
+        ctx.translate(vw, 0); ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, vw, vh);
+        ctx.restore();
+    
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          preview.src = url;
+          show(preview);
+          hide(video);
+          hide(shotBtn);
+          show(retakeBtn);
+          show(uploadBtn);
+        }, 'image/jpeg', 0.9);
+      }
+    
+      function retake(){
+        show(video);
+        hide(preview);
+        show(shotBtn);
+        hide(retakeBtn);
+        hide(uploadBtn);
+      }
+    
+      async function upload(){
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.9));
+        const form = new FormData();
+        form.append('photo', blob, 'foto.jpg');
+    
+        try {
+          const resp = await fetch('/upload', { method:'POST', body: form });
+          await resp.text();
+    
+          if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
+          stopFloating();
+    
+          document.body.classList.add('done');
+          document.body.innerHTML = `
+            <h1 class="thanks">
+              Gracias por tu presencia, es muy importante para nosotros en este día tan especial
+            </h1>
+          `;
+        } catch (err){
+          alert('Error al subir la foto: ' + err);
+        }
+      }
+    
+      // Eventos
+      startBtn.addEventListener('click', startCamera);
+      shotBtn.addEventListener('click', takePhoto);
+      retakeBtn.addEventListener('click', retake);
+      uploadBtn.addEventListener('click', upload);
+    
+      // Animación
+      startFloating();
+    
+      // Limpieza
+      window.addEventListener('beforeunload', () => {
+        if(stream) stream.getTracks().forEach(t => t.stop());
+        stopFloating();
+      });
+    })();
+    </script>
+    
+
+
+</body>
+</html>
