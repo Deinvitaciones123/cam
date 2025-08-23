@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html>d
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
@@ -268,27 +268,35 @@
       }
     
       async function upload(){
-        const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.9));
-        const form = new FormData();
-        form.append('photo', blob, 'foto.jpg');
-    
-        try {
-          const resp = await fetch('/upload', { method:'POST', body: form });
-          await resp.text();
-    
-          if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
-          stopFloating();
-    
-          document.body.classList.add('done');
-          document.body.innerHTML = `
-            <h1 class="thanks">
-              Gracias por tu presencia, es muy importante para nosotros en este día tan especial
-            </h1>
-          `;
-        } catch (err){
-          alert('Error al subir la foto: ' + err);
-        }
-      }
+  // Convierte el canvas a Blob (JPEG)
+  const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.9));
+  const form = new FormData();
+  form.append('photo', blob, 'foto.jpg');
+
+  try {
+    const resp = await fetch("https://script.google.com/macros/s/AKfycbyWA_xF9xG18fwljCZsJH2ygxYAOmHQ8VyCxMHvg0_fegnj46fv_jUXWQFyurxyjOMBVQ/exec", {
+      method: "POST",
+      body: form
+    });
+
+    const msg = await resp.text();
+    alert("Respuesta del servidor: " + msg);
+
+    // Detén la cámara
+    if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
+
+    // Pantalla final
+    document.body.classList.add('done');
+    document.body.innerHTML = `
+      <h1 class="thanks">
+        Gracias por tu presencia, es muy importante para nosotros en este día tan especial
+      </h1>
+    `;
+  } catch(err){
+    alert("Error al subir la foto: " + err);
+  }
+}
+
     
       // Eventos
       startBtn.addEventListener('click', startCamera);
