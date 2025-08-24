@@ -12,7 +12,7 @@
     margin: 0;
     height: 100vh;
     overflow: hidden;
-    background: url('https://i0.wp.com/i.pinimg.com/originals/12/d6/8a/12d68aeeabea27504d88c415044248af.gif') no-repeat center center fixed;
+    /* background: url('https://i0.wp.com/i.pinimg.com/originals/12/d6/8a/12d68aeeabea27504d88c415044248af.gif') no-repeat center center fixed; */
     background-size: cover;
     display: flex;
     flex-direction: column;
@@ -164,13 +164,29 @@
 
     let stream;
 
+    let useFront = true;
+
     async function startCamera() {
-      stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop()); // detener la anterior
+      }
+
+      stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: useFront ? "user" : "environment" }
+      });
+
       video.srcObject = stream;
       video.style.display = "block";
       preview.style.display = "none";
-      btnsContainer.innerHTML = '<button id="fotoBtn">Tomar Foto</button>';
+      btnsContainer.innerHTML = `
+        <button id="fotoBtn">Tomar Foto</button>
+        <button id="flipBtn">Voltear Cámara</button>
+      `;
       document.getElementById("fotoBtn").onclick = takePhoto;
+      document.getElementById("flipBtn").onclick = () => {
+        useFront = !useFront;
+        startCamera();
+      };
     }
 
     async function takePhoto() {
@@ -195,7 +211,7 @@
       };
 
 document.getElementById("uploadBtn").onclick = () => {
-  fetch("URL_DEL_SCRIPT", {
+  fetch("https://script.google.com/macros/s/AKfycbyOstIwlAWD5uIKbJOgHWEJZDXHJ3myZX-9EDlQZZ988lwl1AT_dlKulz8rjLbmxhgHqg/exec", {
     method: "POST",
     body: JSON.stringify({ image: imgData })
   })
