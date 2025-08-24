@@ -76,8 +76,9 @@
   #video {
     border-radius: 25px;
     border: 5px solid #ff8c42;
-    width: 500px;
-    height: 375px;
+    height:80vh;
+    width: 90vw;       /* usar casi todo el ancho de pantalla */
+    max-width: 900px;  /* pero no más de 500px en pantallas grandes */
     object-fit: cover;
     z-index: 2;
     position: relative;
@@ -88,8 +89,9 @@
   #preview {
     border-radius: 25px;
     border: 5px solid #ff8c42;
-    width: 500px;
-    height: 375px;
+    height:80vh;
+    width: 90vw;       /* usar casi todo el ancho de pantalla */
+    max-width: 900px;  /* pero no más de 500px en pantallas grandes */
     object-fit: cover;
     display: none;
     z-index: 2;
@@ -260,3 +262,4 @@ document.getElementById("uploadBtn").onclick = () => {
   </script>
 </body>
 </html>
+
