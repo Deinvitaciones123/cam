@@ -153,8 +153,12 @@
 
     async function startCamera() {
       // Si había un video de galería cargado, limpiarlo
-      video.removeAttribute('src');
-      video.load();
+            if (video) {
+        video.removeAttribute('src');
+        if (typeof video.load === "function") {
+          video.load();
+        }
+      }
 
       // Detener stream anterior
       if (stream) stream.getTracks().forEach(t => t.stop());
@@ -221,8 +225,10 @@
         } else {
           // Mostrar imagen seleccionada
           video.style.display = "none";
-          video.removeAttribute('src');
-          video.load();
+          if (video) {
+            video.removeAttribute('src');
+            if (typeof video.load === "function") video.load();
+          }
           preview.src = dataURL;
           preview.style.display = "block";
         }
@@ -298,3 +304,4 @@
   </script>
 </body>
 </html>
+
