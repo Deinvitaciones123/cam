@@ -274,28 +274,26 @@
     }
 
       // Reemplaza tu bloque de subida por este:
-      async function uploadSelected() {
+       async function uploadSelected() {
         if (!uploadPayload?.data) { alert("No hay archivo seleccionado"); return; }
-      
         try {
           const res = await fetch(ENDPOINT, {
             method: "POST",
-            // OJO: sin headers personalizados evita el preflight
-            // headers: { "Content-Type": "text/plain;charset=utf-8" },  // opcional
+            // sin headers personalizados
             body: JSON.stringify({
               filename: uploadPayload.filename,
               mime: uploadPayload.mime,
-              data: uploadPayload.data // DataURL base64
+              data: uploadPayload.data
             })
           });
-      
-          const msg = await res.text();   // Apps Script regresará texto
+          const msg = await res.text();
           alert(msg);
           finishScreen();
         } catch (err) {
           alert("Error: " + (err?.message || err));
         }
       }
+
 
 
     // Iniciar cámara por defecto
@@ -308,5 +306,6 @@
   </script>
 </body>
 </html>
+
 
 
