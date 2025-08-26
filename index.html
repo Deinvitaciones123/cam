@@ -122,7 +122,9 @@
 
   <canvas id="canvas" style="display:none;"></canvas>
 
+    
   <script>
+    
     const ENDPOINT = "https://script.google.com/macros/s/AKfycbzPK-Cdzmj-z52YjSEeTze9RLbYv87pEGr6_hGJTG6Cn2xr1IJimvHIrLCcD2z2lrK93g/exec"; // tu URL /exec
 
 
@@ -273,30 +275,31 @@
     }
 
       // Reemplaza tu bloque de subida por este:
-            async function uploadSelected() {
-        if (!uploadPayload || !uploadPayload.data) {
-          alert("No hay archivo seleccionado");
-          return;
-        }
+      async function uploadSelected() {
+  if (!uploadPayload || !uploadPayload.data) {
+    alert("No hay archivo seleccionado");
+    return;
+  }
 
-        try {
-          const res = await fetch(ENDPOINT, {
-            method: "POST",
-            // SIN headers personalizados para evitar preflight/CORS
-            body: JSON.stringify({
-              filename: uploadPayload.filename,  // ej. "foto.png" o nombre del archivo elegido
-              mime:     uploadPayload.mime,      // ej. "image/png" o "video/mp4"
-              data:     uploadPayload.data       // DataURL base64: "data:...;base64,AAAA..."
-            })
-          });
+  try {
+    const res = await fetch(ENDPOINT, {
+      method: "POST",
+      // SIN headers personalizados para evitar preflight/CORS
+      body: JSON.stringify({
+        filename: uploadPayload.filename,  // ej. "foto.png" o nombre del archivo elegido
+        mime:     uploadPayload.mime,      // ej. "image/png" o "video/mp4"
+        data:     uploadPayload.data       // DataURL base64: "data:...;base64,AAAA..."
+      })
+    });
 
-          const msg = await res.text();
-          alert(msg);            // "OK: archivo subido" si todo salió bien
-          finishScreen();        // tu pantalla de gracias
-        } catch (err) {
-          alert("Error: " + (err?.message || err));
-        }
-      }
+    const msg = await res.text();
+    alert(msg);            // "OK: archivo subido" si todo salió bien
+    finishScreen();        // tu pantalla de gracias
+  } catch (err) {
+    alert("Error: " + (err?.message || err));
+  }
+}
+
 
 
 
