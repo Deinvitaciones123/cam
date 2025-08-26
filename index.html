@@ -123,7 +123,8 @@
   <canvas id="canvas" style="display:none;"></canvas>
 
   <script>
-    const ENDPOINT = "https://script.google.com/macros/s/AKfycbzPK-Cdzmj-z52YjSEeTze9RLbYv87pEGr6_hGJTG6Cn2xr1IJimvHIrLCcD2z2lrK93g/exec";
+    const ENDPOINT = "https://script.google.com/macros/s/AKfycbzPK-Cdzmj-z52YjSEeTze9RLbYv87pEGr6_hGJTG6Cn2xr1IJimvHIrLCcD2z2lrK93g/exec"; // tu URL /exec
+
 
     function createFloating() {
       const isHeart = Math.random() > 0.3;
@@ -242,16 +243,14 @@
     });
 
     function showReviewButtons() {
-      btnsContainer.innerHTML = `
-        <button id="retakeBtn">${uploadPayload.isVideo ? 'Elegir otro' : 'Tomar Otra'}</button>
-        <button id="uploadBtn">Subir</button>
-      `;
-      document.getElementById("retakeBtn").onclick = () => {
-        // Si era de galería, regresamos a elegir; si era cámara, regresamos a cámara
-        startCamera();
-      };
-      document.getElementById("uploadBtn").onclick = uploadSelected;
-    }
+  btnsContainer.innerHTML = `
+    <button id="retakeBtn">${uploadPayload.isVideo ? 'Elegir otro' : 'Tomar Otra'}</button>
+    <button id="uploadBtn">Subir</button>
+  `;
+  document.getElementById("retakeBtn").onclick = () => startCamera();
+  document.getElementById("uploadBtn").onclick = uploadSelected; // ← aquí la llamas
+}
+
 
     function finishScreen() {
       // Detener cámara si estuviera activa
@@ -274,25 +273,31 @@
     }
 
       // Reemplaza tu bloque de subida por este:
-       async function uploadSelected() {
-        if (!uploadPayload?.data) { alert("No hay archivo seleccionado"); return; }
+            async function uploadSelected() {
+        if (!uploadPayload || !uploadPayload.data) {
+          alert("No hay archivo seleccionado");
+          return;
+        }
+
         try {
           const res = await fetch(ENDPOINT, {
             method: "POST",
-            // sin headers personalizados
+            // SIN headers personalizados para evitar preflight/CORS
             body: JSON.stringify({
-              filename: uploadPayload.filename,
-              mime: uploadPayload.mime,
-              data: uploadPayload.data
+              filename: uploadPayload.filename,  // ej. "foto.png" o nombre del archivo elegido
+              mime:     uploadPayload.mime,      // ej. "image/png" o "video/mp4"
+              data:     uploadPayload.data       // DataURL base64: "data:...;base64,AAAA..."
             })
           });
+
           const msg = await res.text();
-          alert(msg);
-          finishScreen();
+          alert(msg);            // "OK: archivo subido" si todo salió bien
+          finishScreen();        // tu pantalla de gracias
         } catch (err) {
           alert("Error: " + (err?.message || err));
         }
       }
+
 
 
 
@@ -306,6 +311,7 @@
   </script>
 </body>
 </html>
+
 
 
 
