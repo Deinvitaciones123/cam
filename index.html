@@ -277,29 +277,34 @@
       // Reemplaza tu bloque de subida por este:
       const ENDPOINT = "https://script.google.com/macros/s/AKfycbx-SsJMltuulN-Dy_-P3yO5YJLyVf0McXf37AUiSpYy_7YZjiVe4pC92dgZkmJMWjMKFw/exec"; // usa tu /exec
 
-async function uploadSelected() {
+      async function uploadSelected() {
   if (!uploadPayload?.data) { alert("No hay archivo seleccionado"); return; }
 
   try {
+    // Intento normal (sin headers para evitar preflight)
     const res = await fetch(ENDPOINT, {
       method: "POST",
-      // sin headers personalizados
-      body: JSON.stringify({
-        // si usas tu código anterior de solo imagen, también funciona porque el server acepta 'image'
-        filename: uploadPayload.filename,   // ej: "foto.png" o "video.mp4"
-        mime:     uploadPayload.mime,       // ej: "image/png" o "video/mp4"
-        data:     uploadPayload.data        // DataURL base64 (o envía 'image': uploadPayload.data)
-        // image:  uploadPayload.data
-      })
+      body: JSON.stringify({ image: uploadPayload.data }) // tu doPost usa "image"
     });
-
-    const msg = await res.text();
-    alert(msg);            // "OK: archivo subido"
+    const msg = await res.text();   // si CORS permite leerla
+    alert(msg);
     finishScreen();
-  } catch (err) {
-    alert("Error: " + (err?.message || err));
+  } catch (e1) {
+    // Fallback: no-cors (no podremos leer la respuesta, pero sí se envía)
+    try {
+      await fetch(ENDPOINT, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify({ image: uploadPayload.data })
+      });
+      alert("Enviado. Revisa tu carpeta de Drive.");
+      finishScreen();
+    } catch (e2) {
+      alert("Error: " + (e2?.message || e2));
+    }
   }
 }
+
 
 
 
