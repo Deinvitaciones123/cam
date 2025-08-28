@@ -81,7 +81,7 @@ body{
     border: none;
     color: white;
     padding: 18px 40px;
-    font-size: 20px;
+    font-size: 50px;
     font-weight: bold;
     border-radius: 15px;
     cursor: pointer;
@@ -137,14 +137,14 @@ body{
   }
   @keyframes gradientBG { 0%{background-position:0 50%} 50%{background-position:100% 50%} 100%{background-position:0 50%} }
 
-  .heart, .star { position: absolute; width: 20px; height: 20px; animation: floatUp linear infinite; }
+  /* .heart, .star { position: absolute; width: 20px; height: 20px; animation: floatUp linear infinite; }
   .heart { background-color: rgba(255,108,199,0.8);
     clip-path: polygon(50% 0%, 61% 12%, 75% 12%, 87% 25%, 87% 38%, 75% 50%, 50% 75%, 25% 50%, 13% 38%, 13% 25%, 25% 12%, 39% 12%);
   }
   .star { background-color: rgba(255,255,255,0.7);
     clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
   }
-  @keyframes floatUp { 0%{transform:translateY(100vh) scale(1);opacity:0} 10%{opacity:1} 100%{transform:translateY(-100px) scale(0.5);opacity:0} }
+  @keyframes floatUp { 0%{transform:translateY(100vh) scale(1);opacity:0} 10%{opacity:1} 100%{transform:translateY(-100px) scale(0.5);opacity:0} } */
 
   /* Botones compactos y responsivos */
 #btnsContainer{ 
@@ -158,7 +158,7 @@ body{
 #btnsContainer button{
   width: min(92%, 280px);            /* ↓ antes 80vw/420px */
   padding: 10px 16px;                /* ↓ antes 18px 40px */
-  font-size: clamp(14px, 3.6vw, 17px); /* ↓ antes 20px */
+  font-size: clamp(20px, 3.6vw, 17px); /* ↓ antes 20px */
   border-radius: 12px;
 }
 
@@ -236,7 +236,7 @@ h2{
 #btnsContainer button{
   width: 100%;
   padding: clamp(10px, 3vw, 14px) clamp(14px, 4vw, 18px);
-  font-size: clamp(14px, 4vw, 18px);
+  font-size: clamp(14px, 20px, 20px);
   border-radius: clamp(10px, 3vw, 14px);
 }
 /* En pantallas grandes, botones en hilera */
