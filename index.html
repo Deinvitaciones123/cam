@@ -403,8 +403,9 @@ h2{
     <button id="retakeBtn">${uploadPayload.isVideo ? 'Elegir otro' : 'Tomar Otra'}</button>
     <button id="uploadBtn">Subir</button>
   `;
-  document.getElementById("retakeBtn").onclick = () => startCamera();
+  // document.getElementById("retakeBtn").onclick = () => startCamera();
   document.getElementById("uploadBtn").onclick = uploadSelected; // ← aquí la llamas
+  document.getElementById("retakeBtn").onclick = () => startCamera();
 }
 
 
@@ -475,6 +476,7 @@ h2{
   </script>
 </body>
 </html>
+
 
 
 
