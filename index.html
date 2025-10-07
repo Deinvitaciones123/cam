@@ -1,265 +1,123 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Invitación</title>
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Hugs+and+Kisses&display=swap');
 
-/* Marco 4:3 */
-.frame-43{
-  position: relative;
-  width: min(92vw, 720px);
-  aspect-ratio: 4 / 3;            /* 4:3 real (tu CSS decía 3/4) */
-  border-radius: 25px;
-  border: 5px solid #b29874;      /* marco único */
-  overflow: hidden;
-  box-shadow: 0 0 20px #978663, 0 0 40px #ffb3c1, 0 0 60px #978663;
-}
-
-/* Fallback por si el navegador no soporta aspect-ratio */
-@supports not (aspect-ratio: 4/3){
-  .frame-43::before{
-    content:"";
-    display:block;
-    padding-top:75%;              /* 4:3 = 75% */
+  /* ===== Estilos base ===== */
+  body{
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    min-height: 100svh;   /* mejor que 100vh en móvil */
+    height: auto;
+    overflow: auto;       /* permite scroll si hace falta */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: clamp(10px, 3vw, 20px);
+    padding: clamp(10px, 3vw, 18px) clamp(10px, 3vw, 18px) calc(12px + env(safe-area-inset-bottom));
+    background-size: cover;
   }
-}
 
-/* Dentro del marco: ocupan todo, sin marcos propios */
-.frame-43 > video,
-.frame-43 > img{
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  border: 0; box-shadow: none;   /* ← quita marco duplicado */
-}
+  h2{
+    font-family: 'Aparajita', serif;
+    color:#b29874;
+    font-size: clamp(24px, 6.5vw, 48px);
+    text-shadow: 0 0 5px #ffb3c1, 0 0 10px #978663, 0 0 20px #978663;
+    margin: 6px 0 4px;
+  }
 
-/* La foto en preview se ve completa dentro del 4:3 */
-.frame-43 > img{
-  object-fit: contain;
-  background: #0000;             /* o #000 para bandas negras */
-}
+  /* Marco 4:3 */
+  .frame-43{
+    position: relative;
+    width: min(100%, 720px);
+    aspect-ratio: 4 / 3;            /* 4:3 real */
+    border-radius: clamp(16px, 4vw, 26px);
+    border: 5px solid #b29874;      /* marco único */
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(151,134,99,.35), 0 0 20px #978663, 0 0 40px #ffb3c1, 0 0 60px #978663;
+  }
 
-/* Quita los tamaños fijos antiguos (elimina estas reglas si aún las tienes)
-#video, #preview {
-  height:80vh; width:90vw; max-width:900px; border:5px solid ...; box-shadow: ...;
-}
-*/
+  @supports not (aspect-ratio: 4/3){
+    .frame-43::before{ content:""; display:block; padding-top:75%; }
+  }
 
+  /* Dentro del marco: ocupar todo, SIN bordes propios */
+  .frame-43 > video,
+  .frame-43 > img{
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border: 0 !important; box-shadow: none !important;
+  }
+  .frame-43 > img{ object-fit: contain; background: transparent; }
 
-
-body{
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      min-height: 100svh;   /* mejor que 100vh en móvil */
-      height: auto;
-      overflow: auto;       /* permite scroll si hace falta */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 16px;
-      padding: 16px 12px calc(16px + env(safe-area-inset-bottom));
-      background-size: cover;
-    }
-
-
-    h2{
-  font-family: 'Aparajita', serif;   /* o la que uses */
-  color:#b29874;
-  font-size: clamp(28px, 7vw, 52px);
-  text-shadow: 0 0 5px #ffb3c1, 0 0 10px #978663, 0 0 20px #978663;
-  margin: 8px 0 4px;
-}
-
-
-  /* Botones (reutilizado para todos) */
-  #fotoBtn, #retakeBtn, #uploadBtn, #flipBtn, #galleryBtn {
+  /* Botones base */
+  #btnsContainer {
+    display:flex;
+    flex-direction: column;
+    gap: clamp(8px, 2.5vw, 12px);
+    width: min(100%, 720px);
+    align-items:center;
+    justify-content:center;
+  }
+  #btnsContainer button{
+    width: 100%;
+    min-width: 160px;
     background: linear-gradient(45deg, #978663 , #b29874, #978663 );
     background-size: 400% 400%;
     border: none;
     color: white;
-    padding: 18px 40px;
-    font-size: 50px;
+    padding: clamp(10px, 3vw, 14px) clamp(14px, 4vw, 18px);
+    font-size: clamp(14px, 20px, 20px);
     font-weight: bold;
-    border-radius: 15px;
+    border-radius: clamp(10px, 3vw, 14px);
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: 0 6px 20px rgba(0,0,0,0.25);
     animation: gradientBG 5s ease infinite;
-    z-index: 2;
     position: relative;
     overflow: hidden;
-    margin: 5px;
   }
-  #fotoBtn:hover, #retakeBtn:hover, #uploadBtn:hover, #flipBtn:hover, #galleryBtn:hover {
-    transform: scale(1.1);
+  #btnsContainer button:hover{
+    transform: scale(1.03);
     box-shadow: 0 10px 25px rgba(0,0,0,0.35);
   }
-  #fotoBtn::after, #retakeBtn::after, #uploadBtn::after, #flipBtn::after, #galleryBtn::after {
-    content: '';
-    position: absolute; top: -50%; left: -50%;
-    width: 200%; height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.5) 10%, transparent 10%);
-    background-size: 10% 10%;
-    animation: sparkle 1s linear infinite;
-    pointer-events: none;
-  }
-  @keyframes sparkle { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
-
-  /* Video de la cámara o para previsualizar videos */
-  /* #video {
-    border-radius: 25px;
-    border: 5px solid #b29874;
-    height:80vh; max-height: 900px;
-    width: 90vw; max-width: 900px;
-    object-fit: cover;
-    z-index: 2; position: relative;
-    box-shadow: 0 0 20px #978663 , 0 0 40px #ffb3c1, 0 0 60px #978663 ;
-    animation: glow 2s ease-in-out infinite alternate;
-  } */
-  /* Previsualización de imagen */
-  /* #preview { */
-    /* border-radius: 25px;
-    border: 5px solid #b29874;
-    height:80vh; max-height: 900px;
-    width: 90vw; max-width: 900px;
-    object-fit: cover;
-    display: none;
-    z-index: 2; position: relative;
-    box-shadow: 0 0 20px #978663 , 0 0 40px #ffb3c1, 0 0 60px #978663 ;
-  } */
-
-  @keyframes glow {
-    0% { box-shadow: 0 0 20px #978663 , 0 0 40px #ffb3c1, 0 0 60px #978663 ; }
-    100% { box-shadow: 0 0 40px #978663 , 0 0 60px #ffb3c1, 0 0 80px #978663 ; }
+  /* menos animación si el usuario lo prefiere */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; }
   }
   @keyframes gradientBG { 0%{background-position:0 50%} 50%{background-position:100% 50%} 100%{background-position:0 50%} }
 
-  /* .heart, .star { position: absolute; width: 20px; height: 20px; animation: floatUp linear infinite; }
-  .heart { background-color: rgba(255,108,199,0.8);
-    clip-path: polygon(50% 0%, 61% 12%, 75% 12%, 87% 25%, 87% 38%, 75% 50%, 50% 75%, 25% 50%, 13% 38%, 13% 25%, 25% 12%, 39% 12%);
+  /* Grilla de miniaturas (opcional, para confirmar múltiples) */
+  #thumbs{
+    width: min(100%, 720px);
+    display: none;            /* visible solo cuando hay múltiples */
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 8px;
+    margin-top: 6px;
   }
-  .star { background-color: rgba(255,255,255,0.7);
-    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  #thumbs img{
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #b29874;
   }
-  @keyframes floatUp { 0%{transform:translateY(100vh) scale(1);opacity:0} 10%{opacity:1} 100%{transform:translateY(-100px) scale(0.5);opacity:0} } */
 
-  /* Botones compactos y responsivos */
-/* #btnsContainer{ 
-  display:flex; 
-  flex-direction: column; 
-  gap:10px; 
-  align-items:center; 
-  justify-content:center; 
-} */
-#btnsContainer {
-  display: flex;
-  flex-direction: column-reverse; /* invierte el orden visual */
-  gap: 10px; /* separa los botones */
-}
-
-
-#btnsContainer button{
-  width: min(92%, 280px);            /* ↓ antes 80vw/420px */
-  padding: 10px 16px;                /* ↓ antes 18px 40px */
-  font-size: clamp(20px, 3.6vw, 17px); /* ↓ antes 20px */
-  border-radius: 12px;
-}
-
-/* Quita el “crecer” exagerado al pasar el dedo (en móviles no hay hover real) */
-@media (hover: none){
-  #btnsContainer button:hover{ transform:none; box-shadow: 0 6px 16px rgba(0,0,0,.22); }
-}
-
-/* En pantallas grandes, puedes hacerlos en fila y automáticos */
-@media (min-width: 768px){
-  #btnsContainer{ flex-direction: row; }
-  #btnsContainer button{ width: auto; min-width: 160px; }
-}
-
-/* (Opcional) Si ves muchos puntitos sobre los botones, desactiva el brillo */
-#btnsContainer button::after{ display:none; }
-
-/* ===== Responsive overrides ===== */
-
-/* Body fluido en móviles (evita 100vh “falso”) */
-body{
-  min-height: 100svh;
-  height: auto;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: clamp(10px, 3vw, 20px);
-  padding: clamp(10px, 3vw, 18px) clamp(10px, 3vw, 18px)
-           calc(12px + env(safe-area-inset-bottom));
-}
-
-/* Título escalable */
-h2{
-  font-size: clamp(24px, 6.5vw, 48px);
-  margin: 6px 0 4px;
-}
-
-/* Marco 4:3 REAl (tu CSS decía 3/4) */
-.frame-43{
-  position: relative;
-  width: min(100%, 720px);
-  aspect-ratio: 4 / 3;
-  border-radius: clamp(16px, 4vw, 26px);
-  border: 5px solid #b29874;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(151,134,99,.35);
-}
-
-/* Fallback si el navegador no soporta aspect-ratio */
-@supports not (aspect-ratio: 4/3){
-  .frame-43::before{ content:""; display:block; padding-top:75%; }
-}
-
-/* Dentro del marco: ocupar todo, SIN bordes propios */
-.frame-43 > video,
-.frame-43 > img{
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  border: 0 !important; box-shadow: none !important;
-}
-.frame-43 > img{ object-fit: contain; background: transparent; }
-
-/* Controles compactos y fluidos */
-#btnsContainer{
-  display:flex;
-  flex-direction: column;      /* móvil */
-  gap: clamp(8px, 2.5vw, 12px);
-  width: min(100%, 720px);
-  align-items:center;
-  justify-content:center;
-}
-#btnsContainer button{
-  width: 100%;
-  padding: clamp(10px, 3vw, 14px) clamp(14px, 4vw, 18px);
-  font-size: clamp(14px, 20px, 20px);
-  border-radius: clamp(10px, 3vw, 14px);
-}
-/* En pantallas grandes, botones en hilera */
-@media (min-width: 768px){
-  #btnsContainer{ flex-direction: row; }
-  #btnsContainer button{ width: auto; min-width: 160px; }
-}
-
-/* Menos animación si el usuario lo prefiere */
-@media (prefers-reduced-motion: reduce){
-  *{ animation: none !important; }
-}
-
+  /* En pantallas grandes, botones en hilera */
+  @media (min-width: 768px){
+    #btnsContainer{ flex-direction: row; }
+    #btnsContainer button{ width: auto; }
+  }
 </style>
 </head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <body>
   <h2>¡Gracias por acompañarnos!</h2>
 
@@ -268,8 +126,9 @@ h2{
     <video id="video" autoplay playsinline></video>
     <img id="preview" />
   </div>
-  
 
+  <!-- Rejilla de miniaturas (se mostrará si se eligen varias imágenes) -->
+  <div id="thumbs"></div>
 
   <div id="btnsContainer">
     <button id="fotoBtn">Tomar Foto</button>
@@ -277,219 +136,241 @@ h2{
     <button id="galleryBtn">Subir desde galería</button>
   </div>
 
-  <!-- Input oculto para abrir la galería -->
-  <input id="picker" type="file" accept="image/*,video/*" style="display:none" />
+  <!-- Input oculto para abrir la galería (ahora permite múltiples imágenes) -->
+  <input id="picker" type="file" accept="image/*, video/*" multiple style="display:none" />
 
   <canvas id="canvas" style="display:none;"></canvas>
 
-    
-  <script>
-    
-    
+<script>
+  /* =========================
+     Variables y estado
+  ========================== */
+  const video = document.getElementById("video");
+  const canvas = document.getElementById("canvas");
+  const context = canvas.getContext("2d");
+  const preview = document.getElementById("preview");
+  const thumbs = document.getElementById("thumbs");
+  const btnsContainer = document.getElementById("btnsContainer");
+  const picker = document.getElementById("picker");
 
+  let stream;
+  let useFront = true;
 
-    function createFloating() {
-      const isHeart = Math.random() > 0.3;
-      const div = document.createElement('div');
-      div.className = isHeart ? 'heart' : 'star';
-      div.style.left = Math.random() * window.innerWidth + 'px';
-      const size = 10 + Math.random() * 25;
-      div.style.width = div.style.height = size + 'px';
-      div.style.animationDuration = (5 + Math.random() * 5) + 's';
-      document.body.appendChild(div);
-      setTimeout(() => div.remove(), 10000);
+  // Cola de archivos a subir (solo imágenes aquí)
+  // [{ filename, mime, data (base64), isVideo:false }, ...]
+  let uploadQueue = [];
+
+  // Tu endpoint de Apps Script (usa /exec)
+  const ENDPOINT = "https://script.google.com/macros/s/AKfycbx-SsJMltuulN-Dy_-P3yO5YJLyVf0McXf37AUiSpYy_7YZjiVe4pC92dgZkmJMWjMKFw/exec";
+
+  /* =========================
+     Cámara
+  ========================== */
+  async function startCamera() {
+    // Limpiar video si venía de galería
+    if (video) {
+      video.removeAttribute('src');
+      if (typeof video.load === "function") video.load();
     }
-    setInterval(createFloating, 300);
+    // Detener stream anterior
+    if (stream) stream.getTracks().forEach(t => t.stop());
 
-    const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const context = canvas.getContext("2d");
-    const preview = document.getElementById("preview");
-    const btnsContainer = document.getElementById("btnsContainer");
-    const picker = document.getElementById("picker");
-
-    let stream;
-    let useFront = true;
-
-    // Estado de lo que se va a subir
-    let uploadPayload = { filename: null, mime: null, data: null, isVideo: false };
-
-    async function startCamera() {
-      // Si había un video de galería cargado, limpiarlo
-            if (video) {
-        video.removeAttribute('src');
-        if (typeof video.load === "function") {
-          video.load();
-        }
-      }
-
-      // Detener stream anterior
-      if (stream) stream.getTracks().forEach(t => t.stop());
-
+    try {
       stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: useFront ? "user" : "environment" }
       });
-
-      video.srcObject = stream;
-      video.style.display = "block";
-      video.controls = false;
-      preview.style.display = "none";
-
-      btnsContainer.innerHTML = `
-        <button id="fotoBtn">Tomar Foto</button>
-        <button id="flipBtn">Voltear Cámara</button>
-        <button id="galleryBtn">Subir desde galería</button>
-      `;
-      document.getElementById("fotoBtn").onclick = takePhoto;
-      document.getElementById("flipBtn").onclick = () => { useFront = !useFront; startCamera(); };
-      document.getElementById("galleryBtn").onclick = () => picker.click();
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo acceder a la cámara.");
+      return;
     }
 
-    async function takePhoto() {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0);
-      const imgData = canvas.toDataURL("image/png");
+    // Limpiar estado
+    uploadQueue = [];
+    thumbs.style.display = "none";
+    thumbs.innerHTML = "";
 
-      // Previsualización como imagen
-      preview.src = imgData;
-      preview.style.display = "block";
-      video.style.display = "none";
+    // Mostrar cámara
+    video.srcObject = stream;
+    video.style.display = "block";
+    video.controls = false;
+    preview.style.display = "none";
 
-      // Guardamos payload para subir
-      uploadPayload = { filename: "foto.png", mime: "image/png", data: imgData, isVideo: false };
+    renderInitialButtons();
+  }
 
-      showReviewButtons();
-    }
+  function renderInitialButtons(){
+    btnsContainer.innerHTML = `
+      <button id="fotoBtn">Tomar Foto</button>
+      <button id="flipBtn">Voltear Cámara</button>
+      <button id="galleryBtn">Subir desde galería</button>
+    `;
+    document.getElementById("fotoBtn").onclick = takePhoto;
+    document.getElementById("flipBtn").onclick = () => { useFront = !useFront; startCamera(); };
+    document.getElementById("galleryBtn").onclick = () => picker.click();
+  }
 
-    // Manejo de selección desde galería (imagen o video)
-    picker.addEventListener("change", async (e) => {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
+  async function takePhoto() {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0);
+    const imgData = canvas.toDataURL("image/png");
 
-      // Si había stream de cámara, detenerlo
-      if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    // Mostrar previsualización (la primera)
+    preview.src = imgData;
+    preview.style.display = "block";
+    video.style.display = "none";
 
-      const isVideo = file.type.startsWith("video/");
+    // Guardar en cola (siempre imagen)
+    uploadQueue = [{ filename: "foto.png", mime: "image/png", data: imgData, isVideo: false }];
+
+    renderReviewButtons();
+  }
+
+  /* =========================
+     Galería múltiple
+  ========================== */
+  // Helper: leer como DataURL (promesa)
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
-
-      reader.onload = () => {
-        const dataURL = reader.result; // base64
-        uploadPayload = { filename: file.name, mime: file.type, data: dataURL, isVideo };
-
-        if (isVideo) {
-          // Mostrar video seleccionado
-          preview.style.display = "none";
-          video.style.display = "block";
-          video.srcObject = null;
-          video.src = URL.createObjectURL(file);
-          video.controls = true;
-          video.autoplay = true;
-        } else {
-          // Mostrar imagen seleccionada
-          video.style.display = "none";
-          if (video) {
-            video.removeAttribute('src');
-            if (typeof video.load === "function") video.load();
-          }
-          preview.src = dataURL;
-          preview.style.display = "block";
-        }
-        showReviewButtons();
-      };
-
-      // Cargar como base64 (Apps Script suele ser más sencillo con JSON)
+      reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
+      reader.onload = () => resolve(reader.result);
       reader.readAsDataURL(file);
-      // Limpia el input para permitir volver a elegir el mismo archivo si se quiere
-      e.target.value = "";
     });
+  }
 
-    function showReviewButtons() {
-  btnsContainer.innerHTML = `
-    <button id="uploadBtn">Subir</button>  
-    <button id="retakeBtn">${uploadPayload.isVideo ? 'Elegir otro' : 'Tomar Otra'}</button>
-  `;
+  picker.addEventListener("change", async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
-  // asigna eventos DESPUÉS de insertar el HTML
-  document.getElementById("uploadBtn").onclick = uploadSelected;
-  document.getElementById("retakeBtn").onclick = () => startCamera();
-  // ← aquí ya funciona
-}
+    // Detener cámara si estaba activa
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
 
+    // Solo imágenes
+    const imageFiles = files.filter(f => f.type.startsWith("image/"));
+    if (!imageFiles.length) { alert("Selecciona imágenes, por favor."); e.target.value = ""; return; }
 
-
-    function finishScreen() {
-      // Detener cámara si estuviera activa
-      if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
-
-      document.body.innerHTML = `
-        <h1 style="
-          font-family: 'aparajta', serif;
-          color: #b29874; font-size: 50px; text-align: center; margin-top: 20%;
-          text-shadow: 0 0 5px #ffb3c1, 0 0 10px #978663 , 0 0 20px #978663 ;">
-          Gracias por tu presencia, es muy importante para nosotros en este día tan especial
-        </h1>
-      `;
-      document.body.style.backgroundSize = "cover";
-      document.body.style.display = "flex";
-      document.body.style.justifyContent = "center";
-      document.body.style.alignItems = "center";
-      document.body.style.flexDirection = "column";
-      document.body.style.height = "100vh";
-    }
-
-      // Reemplaza tu bloque de subida por este:
-      const ENDPOINT = "https://script.google.com/macros/s/AKfycbx-SsJMltuulN-Dy_-P3yO5YJLyVf0McXf37AUiSpYy_7YZjiVe4pC92dgZkmJMWjMKFw/exec"; // usa tu /exec
-
-      async function uploadSelected() {
-  if (!uploadPayload?.data) { alert("No hay archivo seleccionado"); return; }
-
-  try {
-    // Intento normal (sin headers para evitar preflight)
-    const res = await fetch(ENDPOINT, {
-      method: "POST",
-      body: JSON.stringify({ image: uploadPayload.data }) // tu doPost usa "image"
-    });
-    const msg = await res.text();   // si CORS permite leerla
-    alert(msg);
-    finishScreen();
-  } catch (e1) {
-    // Fallback: no-cors (no podremos leer la respuesta, pero sí se envía)
     try {
-      await fetch(ENDPOINT, {
+      const dataURLs = await Promise.all(imageFiles.map(readFileAsDataURL));
+      uploadQueue = imageFiles.map((f, i) => ({
+        filename: f.name || `imagen_${i + 1}.png`,
+        mime: f.type || "image/png",
+        data: dataURLs[i],
+        isVideo: false
+      }));
+
+      // Mostrar preview principal (primera imagen)
+      video.style.display = "none";
+      if (video) {
+        video.removeAttribute('src');
+        if (typeof video.load === "function") video.load();
+      }
+      preview.src = uploadQueue[0].data;
+      preview.style.display = "block";
+
+      // Mostrar miniaturas si hay varias
+      if (uploadQueue.length > 1) {
+        thumbs.innerHTML = uploadQueue.map(item => `<img src="${item.data}" alt="thumb">`).join("");
+        thumbs.style.display = "grid";
+      } else {
+        thumbs.style.display = "none";
+        thumbs.innerHTML = "";
+      }
+
+      renderReviewButtons();
+    } catch (err) {
+      console.error(err);
+      alert("Ocurrió un error al leer los archivos.");
+    } finally {
+      // permitir volver a elegir los mismos archivos
+      e.target.value = "";
+    }
+  });
+
+  function renderReviewButtons() {
+    const count = uploadQueue.length;
+    const label = count > 1 ? `Subir ${count} imágenes` : 'Subir';
+    const retake = 'Cancelar / Volver a cámara';
+
+    btnsContainer.innerHTML = `
+      <button id="uploadBtn">${label}</button>  
+      <button id="retakeBtn">${retake}</button>
+    `;
+    document.getElementById("uploadBtn").onclick = uploadSelected;
+    document.getElementById("retakeBtn").onclick = () => startCamera();
+  }
+
+  /* =========================
+     Subida (simultánea)
+  ========================== */
+  async function postOne(dataURL) {
+    // Intento normal (sin headers para evitar preflight)
+    try {
+      const res = await fetch(ENDPOINT, {
         method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify({ image: uploadPayload.data })
+        body: JSON.stringify({ image: dataURL }) // tu doPost usa "image"
       });
-      alert("Enviado. Revisa tu carpeta de Drive.");
-      finishScreen();
-    } catch (e2) {
-      alert("Error: " + (e2?.message || e2));
+      // si CORS permite, lo contamos OK
+      await res.text();
+      return true;
+    } catch (_) {
+      // Fallback no-cors: no podremos leer la respuesta, pero sí se envía
+      try {
+        await fetch(ENDPOINT, {
+          method: "POST",
+          mode: "no-cors",
+          body: JSON.stringify({ image: dataURL })
+        });
+        return true;
+      } catch (e2) {
+        console.error("Fallo al enviar una imagen:", e2);
+        return false;
+      }
     }
   }
-}
 
+  async function uploadSelected() {
+    if (!uploadQueue.length) { alert("No hay imágenes para subir."); return; }
 
+    // Deshabilitar botón para evitar dobles clics
+    const uploadBtn = document.getElementById("uploadBtn");
+    if (uploadBtn) { uploadBtn.disabled = true; uploadBtn.textContent = "Enviando..."; }
 
+    // Subir en simultáneo
+    const results = await Promise.all(uploadQueue.map(item => postOne(item.data)));
+    const ok = results.filter(Boolean).length;
+    const fail = results.length - ok;
 
+    alert(`Listo: ${ok} enviada(s) correctamente${fail ? `, ${fail} falló/fallaron` : ""}.`);
+    finishScreen();
+  }
 
+  function finishScreen() {
+    if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
+    document.body.innerHTML = `
+      <h1 style="
+        font-family: 'Aparajita', serif;
+        color: #b29874; font-size: clamp(28px, 7vw, 50px); text-align: center; margin: 10% 16px 0;
+        text-shadow: 0 0 5px #ffb3c1, 0 0 10px #978663 , 0 0 20px #978663;">
+        ¡Gracias! Tus archivos fueron enviados.
+      </h1>
+    `;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.display = "flex";
+    document.body.style.justifyContent = "center";
+    document.body.style.alignItems = "center";
+    document.body.style.flexDirection = "column";
+    document.body.style.minHeight = "100vh";
+  }
 
-
-    // Iniciar cámara por defecto
-    startCamera();
-
-    // Botón inicial “Tomar Foto” también dispara takePhoto (por si tarda en cargar)
-    document.getElementById("fotoBtn")?.addEventListener("click", takePhoto);
-    // Botón galería
-    document.getElementById("galleryBtn")?.addEventListener("click", () => picker.click());
-  </script>
+  /* =========================
+     Inicio
+  ========================== */
+  startCamera();
+  // listeners por si el DOM tarda
+  document.getElementById("fotoBtn")?.addEventListener("click", takePhoto);
+  document.getElementById("galleryBtn")?.addEventListener("click", () => picker.click());
+</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
